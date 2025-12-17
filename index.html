@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoBo Sandwich - Business Insights</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FFB347 50%, #4ECDC4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 42px;
+            margin-bottom: 8px;
+            font-weight: 900;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .refresh-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .time-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .filter-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FFB347 100%);
+            color: white;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #FF6B6B 0%, #FFB347 50%, #4ECDC4 100%);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .metric-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-value {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .metric-change {
+            font-size: 14px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .metric-change.positive {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+        
+        .metric-change.negative {
+            background: #FFEBEE;
+            color: #f44336;
+        }
+        
+        .metric-change.neutral {
+            background: #E3F2FD;
+            color: #2196F3;
+        }
+        
+        .revenue { color: #4CAF50; }
+        .orders { color: #2196F3; }
+        .avg-order { color: #FF9800; }
+        .customers { color: #9C27B0; }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-container {
+            min-height: 300px;
+        }
+        
+        .status-breakdown {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+        
+        .status-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .status-new { background: #2196F3; }
+        .status-preparing { background: #FF9800; }
+        .status-ready { background: #4CAF50; }
+        .status-delivered { background: #9C27B0; }
+        .status-rejected { background: #f44336; }
+        
+        .status-label {
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .status-count {
+            font-size: 24px;
+            font-weight: 900;
+            color: #333;
+        }
+        
+        .status-percentage {
+            font-size: 14px;
+            color: #666;
+            margin-left: 8px;
+        }
+        
+        .popular-items {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .popular-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #4ECDC4;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .item-orders {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .item-rank {
+            background: linear-gradient(135deg, #FFB347 0%, #FF6B6B 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        
+        .perf-metric {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .perf-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .perf-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .recent-activity {
+            display: grid;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 3px solid #4ECDC4;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+            min-width: 80px;
+        }
+        
+        .activity-text {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .metric-value {
+                font-size: 32px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 BoBo Sandwich - Business Insights</h1>
+            <p>Real-time operational visibility and analytics</p>
+            
+            <div class="header-actions">
+                <button class="refresh-btn" onclick="location.reload()">🔄 Refresh Data</button>
+                
+                <div class="time-filter">
+                    <button class="filter-btn active" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="week">This Week</button>
+                    <button class="filter-btn" data-filter="month">This Month</button>
+                    <button class="filter-btn" data-filter="all">All Time</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Key Metrics -->
+        <div class="dashboard-grid" id="metricsGrid">
+            <div class="metric-card">
+                <div class="metric-icon">💰</div>
+                <div class="metric-value revenue" id="totalRevenue">€0.00</div>
+                <div class="metric-label">Total Revenue</div>
+                <span class="metric-change positive" id="revenueChange">+0%</span>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">📦</div>
+                <div class="metric-value orders" id="totalOrders">0</div>
+                <div class="metric-label">Total Orders</div>
+                <span class="metric-change neutral" id="ordersChange">0 today</span>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">🧾</div>
+                <div class="metric-value avg-order" id="avgOrderValue">€0.00</div>
+                <div class="metric-label">Average Order Value</div>
+                <span class="metric-change neutral" id="avgChange">—</span>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-value customers" id="totalCustomers">0</div>
+                <div class="metric-label">Unique Customers</div>
+                <span class="metric-change positive" id="customersChange">—</span>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <!-- Order Status Breakdown -->
+            <div class="chart-card">
+                <h3 class="chart-title">📊 Order Status Distribution</h3>
+                <div class="chart-container">
+                    <div class="status-breakdown" id="statusBreakdown">
+                        <div class="loading">Loading data...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Popular Items -->
+            <div class="chart-card">
+                <h3 class="chart-title">🏆 Top Selling Items</h3>
+                <div class="chart-container">
+                    <div class="popular-items" id="popularItems">
+                        <div class="loading">Loading data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="chart-card" style="margin-bottom: 30px;">
+            <h3 class="chart-title">⚡ Performance Metrics</h3>
+            <div class="performance-metrics" id="performanceMetrics">
+                <div class="perf-metric">
+                    <div class="perf-value" id="completionRate">0%</div>
+                    <div class="perf-label">Completion Rate</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="avgPrepTime">0 min</div>
+                    <div class="perf-label">Avg. Prep Time</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="activeOrders">0</div>
+                    <div class="perf-label">Active Orders</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="rejectionRate">0%</div>
+                    <div class="perf-label">Rejection Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="chart-card">
+            <h3 class="chart-title">🕐 Recent Activity (Last 24 Hours)</h3>
+            <div class="recent-activity" id="recentActivity">
+                <div class="loading">Loading activity...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+        import { getFirestore, collection, onSnapshot, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+             apiKey: "AIzaSyCzVGmXLNfU4_jVV9kooB_l2jSh4bKzZE0",
+  authDomain: "bobo-sandwich.firebaseapp.com",
+  projectId: "bobo-sandwich",
+  storageBucket: "bobo-sandwich.firebasestorage.app",
+  messagingSenderId: "899016336634",
+  appId: "1:899016336634:web:86db062e4882e0176fd543",
+  measurementId: "G-1C2XBKMZ5B"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allOrders = [];
+        let currentFilter = 'today';
+
+        // Listen to orders collection in real-time
+        const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+        
+        onSnapshot(q, (snapshot) => {
+            allOrders = [];
+            
+            snapshot.forEach((doc) => {
+                allOrders.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            updateDashboard();
+        });
+
+        function updateDashboard() {
+            const filteredOrders = filterOrdersByTime(allOrders, currentFilter);
+            
+            updateMetrics(filteredOrders);
+            updateStatusBreakdown(filteredOrders);
+            updatePopularItems(filteredOrders);
+            updatePerformanceMetrics(filteredOrders);
+            updateRecentActivity(allOrders);
+        }
+
+        function filterOrdersByTime(orders, filter) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            return orders.filter(order => {
+                if (!order.createdAt) return false;
+                const orderDate = order.createdAt.toDate();
+                
+                switch(filter) {
+                    case 'today':
+                        return orderDate >= today;
+                    case 'week':
+                        return orderDate >= weekAgo;
+                    case 'month':
+                        return orderDate >= monthAgo;
+                    case 'all':
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        function updateMetrics(orders) {
+            // Total Revenue
+            let totalRevenue = 0;
+            orders.forEach(order => {
+                if (order.totalPrice) {
+                    const price = parseFloat(order.totalPrice.replace('€', ''));
+                    totalRevenue += price;
+                }
+            });
+            
+            document.getElementById('totalRevenue').textContent = `€${totalRevenue.toFixed(2)}`;
+            
+            // Total Orders
+            document.getElementById('totalOrders').textContent = orders.length;
+            
+            // Average Order Value
+            const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+            document.getElementById('avgOrderValue').textContent = `€${avgOrderValue.toFixed(2)}`;
+            
+            // Unique Customers
+            const uniqueCustomers = new Set(orders.map(o => o.phoneNumber)).size;
+            document.getElementById('totalCustomers').textContent = uniqueCustomers;
+            
+            // Update change indicators
+            const todayOrders = filterOrdersByTime(allOrders, 'today').length;
+            document.getElementById('ordersChange').textContent = `${todayOrders} today`;
+        }
+
+        function updateStatusBreakdown(orders) {
+            const statusCounts = {
+                'New': 0,
+                'Preparing': 0,
+                'Ready': 0,
+                'Delivered': 0,
+                'Rejected': 0
+            };
+            
+            orders.forEach(order => {
+                if (statusCounts[order.status] !== undefined) {
+                    statusCounts[order.status]++;
+                }
+            });
+            
+            const total = orders.length;
+            const breakdownHTML = Object.entries(statusCounts).map(([status, count]) => {
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                const statusClass = status.toLowerCase().replace(' ', '-');
+                
+                return `
+                    <div class="status-item">
+                        <div class="status-info">
+                            <div class="status-dot status-${statusClass}"></div>
+                            <div class="status-label">${status}</div>
+                        </div>
+                        <div>
+                            <span class="status-count">${count}</span>
+                            <span class="status-percentage">(${percentage}%)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('statusBreakdown').innerHTML = breakdownHTML || '<div class="empty-state"><div class="empty-icon">📊</div><p>No orders yet</p></div>';
+        }
+
+        function updatePopularItems(orders) {
+            const itemCounts = {};
+            
+            orders.forEach(order => {
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        if (!itemCounts[item.name]) {
+                            itemCounts[item.name] = {
+                                name: item.name,
+                                count: 0,
+                                revenue: 0
+                            };
+                        }
+                        itemCounts[item.name].count += item.quantity;
+                        itemCounts[item.name].revenue += (item.basePrice + (item.sizeExtra || 0)) * item.quantity;
+                    });
+                }
+            });
+            
+            const sortedItems = Object.values(itemCounts)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10);
+            
+            if (sortedItems.length === 0) {
+                document.getElementById('popularItems').innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><p>No items sold yet</p></div>';
+                return;
+            }
+            
+            const itemsHTML = sortedItems.map((item, index) => `
+                <div class="popular-item">
+                    <div class="item-rank">${index + 1}</div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-orders">${item.count} orders • €${item.revenue.toFixed(2)} revenue</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('popularItems').innerHTML = itemsHTML;
+        }
+
+        function updatePerformanceMetrics(orders) {
+            // Completion Rate
+            const completed = orders.filter(o => o.status === 'Delivered').length;
+            const completionRate = orders.length > 0 ? ((completed / orders.length) * 100).toFixed(1) : 0;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+            
+            // Active Orders (New, Preparing, Ready)
+            const active = orders.filter(o => ['New', 'Preparing', 'Ready'].includes(o.status)).length;
+            document.getElementById('activeOrders').textContent = active;
+            
+            // Rejection Rate
+            const rejected = orders.filter(o => o.status === 'Rejected').length;
+            const rejectionRate = orders.length > 0 ? ((rejected / orders.length) * 100).toFixed(1) : 0;
+            document.getElementById('rejectionRate').textContent = `${rejectionRate}%`;
+            
+            // Average Prep Time (estimate based on status changes)
+            const deliveredOrders = orders.filter(o => o.status === 'Delivered' && o.createdAt && o.updatedAt);
+            let avgPrepTime = 0;
+            
+            if (deliveredOrders.length > 0) {
+                const totalTime = deliveredOrders.reduce((sum, order) => {
+                    const created = order.createdAt.toDate();
+                    const updated = order.updatedAt.toDate();
+                    return sum + (updated - created);
+                }, 0);
+                avgPrepTime = Math.round((totalTime / deliveredOrders.length) / (1000 * 60)); // Convert to minutes
+            }
+            
+            document.getElementById('avgPrepTime').textContent = `${avgPrepTime} min`;
+        }
+
+        function updateRecentActivity(orders) {
+            const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const recentOrders = orders.filter(order => {
+                if (!order.createdAt) return false;
+                return order.createdAt.toDate() >= last24Hours;
+            }).slice(0, 20);
+            
+            if (recentOrders.length === 0) {
+                document.getElementById('recentActivity').innerHTML = '<div class="empty-state"><div class="empty-icon">🕐</div><p>No recent activity in the last 24 hours</p></div>';
+                return;
+            }
+            
+            const activityHTML = recentOrders.map(order => {
+                const timeAgo = formatTimeAgo(order.createdAt);
+                let activityText = '';
+                
+                if (order.status === 'New') {
+                    activityText = `🆕 New order ${order.orderNumber} from ${order.customerName}`;
+                } else if (order.status === 'Preparing') {
+                    activityText = `🔪 Order ${order.orderNumber} started preparing`;
+                } else if (order.status === 'Ready') {
+                    activityText = `✅ Order ${order.orderNumber} is ready for pickup`;
+                } else if (order.status === 'Delivered') {
+                    activityText = `📦 Order ${order.orderNumber} delivered to ${order.customerName}`;
+                } else if (order.status === 'Rejected') {
+                    activityText = `❌ Order ${order.orderNumber} was rejected`;
+                }
+                
+                return `
+                    <div class="activity-item">
+                        <div class="activity-time">${timeAgo}</div>
+                        <div class="activity-text">${activityText}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('recentActivity').innerHTML = activityHTML;
+        }
+
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return 'Just now';
+            
+            const now = new Date();
+            const orderTime = timestamp.toDate();
+            const diffMs = now - orderTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        }
+
+        // Time filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentFilter = this.getAttribute('data-filter');
+                updateDashboard();
+            });
+        });
+    </script>
+</body>
+</html>
